@@ -38,6 +38,7 @@
 
     <!-- Plugin compatibility -->
     <depends>com.intellij.modules.platform</depends>
+    <depends>org.jetbrains.android</depends>
     <depends>org.jetbrains.kotlin</depends>
 
     <extensions defaultExtensionNs="com.intellij">
@@ -75,8 +76,14 @@
     <actions>
         <!-- Main action group for The Forge -->
         <group id="com.forge.MainGroup" text="The Forge" popup="true">
-            <action id="com.forge.CompareWithFigma"/>
-            <action id="com.forge.ApproveAsBaseline"/>
+            <action id="com.forge.CompareWithFigma" 
+                    class="com.forge.actions.CompareWithFigmaAction" 
+                    text="Compare with Figma" 
+                    description="Compare current Compose component with Figma design"/>
+            <action id="com.forge.ApproveAsBaseline" 
+                    class="com.forge.actions.ApproveAsBaselineAction" 
+                    text="Approve as Baseline" 
+                    description="Approve current Compose render as new baseline"/>
             <separator/>
             <action id="com.forge.OpenSettings" 
                     class="com.forge.actions.OpenSettingsAction" 
