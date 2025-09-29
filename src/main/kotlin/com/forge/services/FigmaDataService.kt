@@ -127,12 +127,21 @@ class FigmaDataService(private val project: Project) {
     /**
      * Get cache statistics
      */
-    fun getCacheStatistics(): CacheStatistics {
-        return CacheStatistics(
-            filesCached = fileCache.size,
-            nodesCached = nodeCache.size,
-            imagesCached = imageCache.size
+    fun getCacheStatistics(): Map<String, Any> {
+        return mapOf(
+            "filesCached" to fileCache.size,
+            "nodesCached" to nodeCache.size,
+            "imagesCached" to imageCache.size,
+            "totalMemoryUsage" to estimateMemoryUsage()
         )
+    }
+    
+    private fun estimateMemoryUsage(): Long {
+        var totalSize = 0L
+        fileCache.values.forEach { totalSize += it.name.length * 2 + it.key.length * 2 }
+        nodeCache.values.forEach { totalSize += it.rawJson.length * 2 }
+        imageCache.values.forEach { totalSize += it.imageBytes.size }
+        return totalSize
     }
     
     fun dispose() {
@@ -140,12 +149,3 @@ class FigmaDataService(private val project: Project) {
         logger.info("FigmaDataService disposed")
     }
 }
-
-/**
- * Cache statistics
- */
-data class CacheStatistics(
-    val filesCached: Int,
-    val nodesCached: Int,
-    val imagesCached: Int
-)

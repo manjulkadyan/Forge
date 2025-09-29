@@ -164,14 +164,16 @@ data class FigmaNodeData(
     val id: String,
     val name: String,
     val type: String,
-    val visible: Boolean
+    val visible: Boolean,
+    val rawJson: String = "{}"
 )
 
 data class FigmaImageData(
     val nodeId: String,
     val url: String,
     val format: String,
-    val scale: Float
+    val scale: Float,
+    val imageBytes: ByteArray = byteArrayOf()
 )
 
 data class HttpResponse(

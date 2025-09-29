@@ -10,6 +10,7 @@ import com.intellij.openapi.diagnostic.thisLogger
 import com.forge.services.ForgeService
 import com.forge.services.ComparisonService
 import com.forge.services.ComposeRenderService
+import com.forge.services.FigmaDataService
 import com.forge.ui.ComparisonDialog
 import com.forge.utils.ComposableAnalyzer
 import com.forge.rendering.RenderResult
@@ -86,11 +87,36 @@ class CompareWithFigmaAction : AnAction(), DumbAware {
                 return
             }
             
-            logger.info("Compose component rendered successfully")
-            
-            // Show the comparison dialog
-            val dialog = ComparisonDialog(project, composableInfo)
-            dialog.show()
+                    logger.info("Compose component rendered successfully")
+
+                    // Get Figma data (this would typically come from user input or configuration)
+                    val figmaDataService = project.getService(FigmaDataService::class.java)
+                    val comparisonService = project.getService(ComparisonService::class.java)
+                    
+                    // For now, we'll show a dialog asking for Figma file and node information
+                    // In a real implementation, this would be integrated with a UI for selecting Figma designs
+                    val figmaFileKey = "your-figma-file-key" // This would come from user input
+                    val nodeId = "your-node-id" // This would come from user input
+                    
+                    // Perform comparison
+                    val comparisonResult = runBlocking {
+                        comparisonService.compareWithCachedFigma(renderResult, figmaFileKey, nodeId)
+                    }
+                    
+                    if (comparisonResult != null) {
+                        logger.info("Comparison completed: ${comparisonResult.getSummary()}")
+                        
+                        // Show the comparison dialog with results
+                        val dialog = ComparisonDialog(project, composableInfo, comparisonResult)
+                        dialog.show()
+                    } else {
+                        Messages.showMessageDialog(
+                            project,
+                            "Failed to perform comparison. Please check your Figma configuration and try again.",
+                            "Comparison Failed",
+                            Messages.getWarningIcon()
+                        )
+                    }
             
         } catch (e: Exception) {
             logger.error("Error during Figma comparison", e)
