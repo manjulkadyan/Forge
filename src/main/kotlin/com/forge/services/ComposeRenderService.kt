@@ -6,6 +6,7 @@ import com.intellij.openapi.diagnostic.thisLogger
 import com.forge.rendering.GradleRenderTask
 import com.forge.rendering.RenderResult
 import com.forge.rendering.LayoutNode
+import com.forge.rendering.RenderMetadata
 import com.forge.models.ForgeConfiguration
 import com.forge.utils.ComposableAnalyzer
 import kotlinx.coroutines.CoroutineScope

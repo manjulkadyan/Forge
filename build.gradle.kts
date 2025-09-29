@@ -25,6 +25,9 @@ dependencies {
     implementation("com.squareup.moshi:moshi-kotlin:1.15.0")
     implementation("com.github.ben-manes.caffeine:caffeine:3.1.6")
     
+    // Kotlin serialization
+    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.6.0")
+    
     // For image processing and comparison
     implementation("org.imgscalr:imgscalr-lib:4.2")
     
