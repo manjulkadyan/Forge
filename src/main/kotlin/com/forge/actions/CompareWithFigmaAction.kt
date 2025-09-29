@@ -9,10 +9,13 @@ import com.intellij.openapi.ui.Messages.*
 import com.intellij.openapi.diagnostic.thisLogger
 import com.forge.services.ForgeService
 import com.forge.services.ComparisonService
+import com.forge.services.ComposeRenderService
 import com.forge.ui.ComparisonDialog
 import com.forge.utils.ComposableAnalyzer
+import com.forge.rendering.RenderResult
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 
 /**
  * Action to compare a Composable function with its Figma design
@@ -66,6 +69,24 @@ class CompareWithFigmaAction : AnAction(), DumbAware {
             }
             
             logger.info("Starting comparison for Composable: ${composableInfo.functionName}")
+            
+            // Render the Compose component first
+            val renderService = project.getService(ComposeRenderService::class.java)
+            val renderResult = runBlocking {
+                renderService.renderComposable(composableInfo.fullQualifiedName)
+            }
+            
+            if (!renderResult.success) {
+                Messages.showMessageDialog(
+                    project,
+                    "Failed to render Compose component: ${renderResult.error}",
+                    "Render Failed",
+                    Messages.getErrorIcon()
+                )
+                return
+            }
+            
+            logger.info("Compose component rendered successfully")
             
             // Show the comparison dialog
             val dialog = ComparisonDialog(project, composableInfo)

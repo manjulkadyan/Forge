@@ -131,4 +131,84 @@ object ComposableAnalyzer {
         }
         return offset
     }
+    
+    /**
+     * Find all @Composable @Preview functions in a PSI file (for rendering service)
+     */
+    fun findPreviewComposables(psiFile: PsiFile): List<String> {
+        return try {
+            val functions = PsiTreeUtil.findChildrenOfType(psiFile, KtFunction::class.java)
+            functions.filter { it.isComposablePreview() }
+                .mapNotNull { function ->
+                    val containingClass = PsiTreeUtil.getParentOfType(function, KtClassOrObject::class.java)
+                    val packageName = (psiFile as? KtFile)?.packageFqName?.asString()
+                    
+                    buildString {
+                        packageName?.let { append("$it.") }
+                        containingClass?.name?.let { append("$it.") }
+                        append(function.name ?: "Unknown")
+                    }
+                }
+        } catch (e: Exception) {
+            logger.warn("Error finding preview composables", e)
+            emptyList()
+        }
+    }
+    
+    /**
+     * Check if a function is a @Composable @Preview function (for rendering service)
+     */
+    fun isPreviewComposable(psiFile: PsiFile, functionName: String): Boolean {
+        return try {
+            val functions = PsiTreeUtil.findChildrenOfType(psiFile, KtFunction::class.java)
+            val function = functions.find { it.name == functionName }
+            function?.isComposablePreview() == true
+        } catch (e: Exception) {
+            logger.warn("Error checking if function is preview composable: $functionName", e)
+            false
+        }
+    }
+    
+    /**
+     * Get detailed information about a preview composable
+     */
+    fun getPreviewComposableInfo(psiFile: PsiFile, functionName: String): PreviewComposableInfo? {
+        return try {
+            val functions = PsiTreeUtil.findChildrenOfType(psiFile, KtFunction::class.java)
+            val function = functions.find { it.name == functionName } ?: return null
+            
+            PreviewComposableInfo(
+                name = functionName,
+                lineNumber = getLineNumber(function.textOffset, psiFile),
+                hasComposable = function.hasAnnotation("Composable"),
+                hasPreview = function.hasAnnotation("Preview"),
+                isPublic = true, // Simplified for now
+                isInternal = false, // Simplified for now
+                parameters = function.valueParameters.map { it.name ?: "unknown" }
+            )
+        } catch (e: Exception) {
+            logger.error("Error getting preview composable info for: $functionName", e)
+            null
+        }
+    }
+    
+    private fun getLineNumber(offset: Int, psiFile: PsiFile): Int {
+        return psiFile.getLineNumber(offset) + 1
+    }
+}
+
+/**
+ * Information about a preview composable function
+ */
+data class PreviewComposableInfo(
+    val name: String,
+    val lineNumber: Int,
+    val hasComposable: Boolean,
+    val hasPreview: Boolean,
+    val isPublic: Boolean,
+    val isInternal: Boolean,
+    val parameters: List<String>
+) {
+    val isValid: Boolean
+        get() = hasComposable && hasPreview && (isPublic || isInternal)
 }
