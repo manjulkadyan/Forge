@@ -1,0 +1,92 @@
+<idea-plugin>
+    <id>com.forge.figma-compose-parity</id>
+    <name>The Forge - Figma to Compose Parity</name>
+    <vendor email="support@forge.dev" url="https://forge.dev">Forge Team</vendor>
+
+    <description><![CDATA[
+    <h2>The Forge - Figma to Compose Parity Plugin</h2>
+    <p>Automatically verify that your Compose UI components match their Figma designs with pixel-perfect accuracy and structural validation.</p>
+    
+    <h3>Key Features:</h3>
+    <ul>
+        <li><b>Visual Parity Testing:</b> Compare rendered Compose components with Figma designs using perceptual hashing</li>
+        <li><b>Structural Validation:</b> Verify layout properties, spacing, and design tokens match exactly</li>
+        <li><b>Secure Integration:</b> Safe storage of Figma Personal Access Tokens</li>
+        <li><b>Real-time Feedback:</b> Instant visual and structural comparison results in IDE</li>
+        <li><b>Baseline Management:</b> Approve design changes and update baselines</li>
+    </ul>
+    
+    <h3>How it works:</h3>
+    <ol>
+        <li>Right-click on any @Composable @Preview function</li>
+        <li>Select "Compare with Figma" from the context menu</li>
+        <li>Paste your Figma URL or node ID</li>
+        <li>Get instant visual and structural comparison results</li>
+    </ol>
+    ]]></description>
+
+    <change-notes><![CDATA[
+    <h3>Version 1.0.0</h3>
+    <ul>
+        <li>Initial release of The Forge plugin</li>
+        <li>Visual parity testing using perceptual hashing</li>
+        <li>Structural validation of layout properties</li>
+        <li>Secure Figma API integration</li>
+        <li>Real-time comparison reporting</li>
+    </ul>
+    ]]></change-notes>
+
+    <!-- Plugin compatibility -->
+    <depends>com.intellij.modules.platform</depends>
+    <depends>org.jetbrains.kotlin</depends>
+
+    <extensions defaultExtensionNs="com.intellij">
+        <!-- Tool Window for displaying comparison results -->
+        <toolWindow id="Forge Comparison" 
+                   anchor="bottom" 
+                   secondary="true" 
+                   icon="/icons/forge-icon.svg"
+                   factoryClass="com.forge.ui.ForgeToolWindowFactory"/>
+        
+        <!-- Settings page for configuration -->
+        <applicationConfigurable parentId="tools" 
+                               instance="com.forge.settings.ForgeSettingsConfigurable"
+                               id="com.forge.settings"
+                               displayName="The Forge"/>
+        
+        <!-- Action to compare Composable with Figma -->
+        <action id="com.forge.CompareWithFigma" 
+                class="com.forge.actions.CompareWithFigmaAction" 
+                text="Compare with Figma" 
+                description="Compare this Composable with Figma design">
+            <add-to-group group-id="EditorPopupMenu" anchor="last"/>
+            <add-to-group group-id="CodeInsightEditorActions" anchor="last"/>
+        </action>
+        
+        <!-- Action to approve current render as baseline -->
+        <action id="com.forge.ApproveAsBaseline" 
+                class="com.forge.actions.ApproveAsBaselineAction" 
+                text="Approve as Baseline" 
+                description="Approve current Compose render as new baseline">
+            <add-to-group group-id="EditorPopupMenu" anchor="after" relative-to-action="com.forge.CompareWithFigma"/>
+        </action>
+    </extensions>
+
+    <actions>
+        <!-- Main action group for The Forge -->
+        <group id="com.forge.MainGroup" text="The Forge" popup="true">
+            <action id="com.forge.CompareWithFigma"/>
+            <action id="com.forge.ApproveAsBaseline"/>
+            <separator/>
+            <action id="com.forge.OpenSettings" 
+                    class="com.forge.actions.OpenSettingsAction" 
+                    text="Open Settings" 
+                    description="Open The Forge settings"/>
+        </group>
+    </actions>
+
+    <applicationListeners>
+        <listener class="com.forge.listeners.ProjectOpenListener" 
+                  topic="com.intellij.openapi.project.ProjectManagerListener"/>
+    </applicationListeners>
+</idea-plugin>
